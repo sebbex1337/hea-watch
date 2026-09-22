@@ -1,0 +1,72 @@
+name: Watch HEA garage
+
+on:
+  schedule:
+    # GitHub Actions cron is UTC ONLY and does not follow DST.
+    # 05:00-17:59 UTC = 06:00-18:59 Danish winter time, 07:00-19:59 summer time.
+    - cron: "7,27,47 5-17 * * *"
+    # Plus a few sweeps outside office hours, in case they publish late.
+    - cron: "13 20,23,3 * * *"
+  workflow_dispatch:
+
+# Needed so the job can commit state.json back to the repo.
+permissions:
+  contents: write
+
+# Never let two checks race each other into a push conflict.
+concurrency:
+  group: hea-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-v1
+
+      - name: Install Playwright
+        run: |
+          pip install --quiet playwright
+          playwright install --with-deps chromium
+
+      - name: Check the listing
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python check.py
+
+      - name: Persist state
+        if: always()
+        run: |
+          if [[ -n "$(git status --porcelain state.json)" ]]; then
+            git config user.name  "hea-watch"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add state.json
+            git commit -m "state: $(date -u +%FT%TZ) [skip ci]"
+            # Another run may have pushed while we were working.
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+            git push
+          else
+            echo "state.json unchanged"
+          fi
+
+      # What the browser actually saw, so a surprise is debuggable.
+      - name: Upload debug snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-snapshot
+          path: debug/
+          retention-days: 7
+          if-no-files-found: ignore

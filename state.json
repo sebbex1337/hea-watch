@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "listing": {
+    "http_status": 200,
+    "fingerprint": "e70ff8e87b85059d18be9dc6c6cd9f5f5ac37eb9ec7042dc9fa6ed370c1935b8",
+    "lines": [
+      "P-PLADS / URANIENBORG ALLÉ 1, SØBORG",
+      "Garage på Uranienborg Allé i Søborg",
+      "UDLEJET",
+      "LEJEMÅLET",
+      "LEJEVILKÅR",
+      "PROSPEKT",
+      "Lukket garage",
+      "Leder du efter et aflukket og sikkert sted til opbevaring af din bil, motorcykel eller cykel, udlejer vi en garage i Søborg.",
+      "Der er lette tilkørselsforhold til garagen, og adgang med egen lås i døgnets 24 timer.",
+      "Ingen vand eller strøm.",
+      "Priser er ekskl. moms.",
+      "Overtagelse efter aftale.",
+      "Lejevilkår",
+      "Mdl. leje",
+      "650 kr.",
+      "Årlig leje",
+      "7.800 kr.",
+      "Depositum",
+      "Efter aftale",
+      "Forudbetalt leje",
+      "Efter aftale",
+      "Momspligtig",
+      "Ja",
+      "Opsigelsesvarsel",
+      "3 mdr.",
+      "Overtagelse",
+      "Efter aftale"
+    ],
+    "statuses": [
+      "udlejet"
+    ],
+    "taken": true,
+    "og_updated_time": "2025-06-23T08:25:19+01:00",
+    "gone": false
+  },
+  "category": {
+    "items": [
+      "https://hea.dk/lejemaal",
+      "https://hea.dk/lejemaal/p-plads/3-ledige-parkeringspladser-pa-gammel-kongevej-160",
+      "https://hea.dk/lejemaal/p-plads/mc-p-plads-i-lyngby",
+      "https://hea.dk/lejemaal/p-plads/p-plads-1-i-rodovre",
+      "https://hea.dk/lejemaal/p-plads/p-plads-2-i-rodovre",
+      "https://hea.dk/lejemaal/p-plads/p-plads-9-i-rodovre",
+      "https://hea.dk/lejemaal/p-plads/p-plads-beliggende-lyngby-hovedgade-56",
+      "https://hea.dk/lejemaal/p-plads/p-plads-beliggende-p-lyngby-hovedgade-34-rustenborgvej-1",
+      "https://hea.dk/lejemaal/p-plads/p-plads-i-rodovre-copy",
+      "https://hea.dk/lejemaal/p-plads/p-plads-paa-gammel-moent-12-udlejes",
+      "https://hea.dk/lejemaal/p-plads/p-plads-paa-gammel-moent-14-udlejes",
+      "https://hea.dk/lejemaal/p-plads/p-plads-til-mc-pa-terraen",
+      "https://hea.dk/lejemaal/p-plads/p-plads-udlejes-centralt-paa-oesterbro",
+      "https://hea.dk/lejemaal/p-plads/p-pladser-i-rodovre",
+      "https://hea.dk/lejemaal/p-plads/p-pladser-pa-prime-pitch-paa-lyngby-hovedgade-copy",
+      "https://hea.dk/lejemaal/p-plads/p-pladser-til-leje-paa-shetlandsgade-3",
+      "https://hea.dk/lejemaal/p-plads/p-pladser-udlejes-pa-gammel-kongevej-156",
+      "https://hea.dk/lejemaal/p-plads/p-pladser-udlejes-pa-lyngby-hovedgade",
+      "https://hea.dk/lejemaal/p-plads/p8-plads-beliggende-pa-lyngby-hovedgade-34-rustenborgvej-1",
+      "https://hea.dk/lejemaal/p-plads/parkeringsplads-pa-attraktiv-beliggenhed-i-aflast-p-kaelder-copy-2",
+      "https://hea.dk/lejemaal/p-plads/parkeringspladser-ved-horsholm-gagade-til-leje"
+    ],
+    "checked": "2026-09-22T15:29:45+00:00"
+  },
+  "seen_status_phrases": [
+    "udlejet"
+  ],
+  "first_seen": "2026-09-22T15:29:45+00:00",
+  "last_checked": "2026-09-22T15:29:45+00:00",
+  "last_change": null,
+  "consecutive_failures": 0
+}
