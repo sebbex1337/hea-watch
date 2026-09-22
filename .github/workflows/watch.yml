@@ -8,6 +8,11 @@ on:
     # Plus a few sweeps outside office hours, in case they publish late.
     - cron: "13 20,23,3 * * *"
   workflow_dispatch:
+    inputs:
+      test_notification:
+        description: "Send test Discord messages instead of checking the listing"
+        type: boolean
+        default: false
 
 # Needed so the job can commit state.json back to the repo.
 permissions:
@@ -44,7 +49,7 @@ jobs:
       - name: Check the listing
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: python check.py
+        run: python check.py ${{ inputs.test_notification && '--test' || '' }}
 
       - name: Persist state
         if: always()

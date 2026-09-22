@@ -15,7 +15,7 @@ Runs on GitHub Actions. Free, no server.
    channel, **Copy Webhook URL**.
 3. GitHub: **Settings → Secrets and variables → Actions → New repository secret**,
    name it `DISCORD_WEBHOOK`, paste the URL.
-4. **Actions** tab → "Watch HEA garage" → **Run workflow**.
+4. **Actions** tab → "Watch HEA garage" → **Run workflow**, tick **"Send test Discord messages"**, and confirm two messages land in the channel. Then run it again unticked to take the baseline.
 
 The first run records the baseline and stays quiet. Every run after that alerts on
 any change. Install the Discord phone app or you won't feel the buzz.
@@ -79,6 +79,24 @@ python test_check.py
 
 No browser or network needed — they feed fixture text through the parsing and assert
 the alert decisions, including the `udlejes`/`udlejet` trap above.
+
+## Checking the Discord wiring
+
+A normal run is silent when nothing has changed, so a green tick proves the scraper
+works and tells you nothing about Discord. To test the notification path itself:
+
+**Actions → Watch HEA garage → Run workflow → tick "Send test Discord messages".**
+
+That sends two messages through the same `notify()` the real alerts use — one quiet,
+one `@everyone`. Both should arrive.
+
+- **Neither arrives:** the `DISCORD_WEBHOOK` secret is wrong or misnamed. The run log
+  prints the HTTP status Discord returned (401/404 = bad or deleted webhook).
+- **Only the quiet one arrives:** the webhook works but `@everyone` is blocked by that
+  channel's permissions — fix it in **Channel Settings → Permissions**, or the alert
+  you actually care about will land without a ping.
+
+Locally: `DISCORD_WEBHOOK='https://...' python check.py --test`
 
 ## Schedule
 

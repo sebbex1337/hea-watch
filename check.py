@@ -365,7 +365,37 @@ def run(page, state: dict) -> dict:
     }
 
 
+def send_test() -> int:
+    """Prove the Discord wiring works, through the exact path a real alert takes.
+
+    Sends both loudness levels: @everyone can be blocked by channel permissions
+    independently of the webhook itself, and the alert you actually care about is
+    the loud one.
+    """
+    if not WEBHOOK:
+        print("!! DISCORD_WEBHOOK is empty -- the secret is missing or misnamed",
+              file=sys.stderr)
+        return 1
+
+    notify(
+        "Test: quiet alert. This is what a price or wording edit looks like.",
+        "- this is how a removed line appears\n+ this is how an added line appears",
+        loud=False,
+    )
+    notify(
+        "Test: LOUD alert. This is what you will get if the garage frees up.",
+        "- UDLEJET\n+ LEDIG",
+        loud=True,
+    )
+    print("\nBoth test messages sent. Check the Discord channel.")
+    print("If only one arrived, @everyone is blocked by that channel's permissions.")
+    return 0
+
+
 def main() -> int:
+    if "--test" in sys.argv:
+        return send_test()
+
     state = load_state()
     DEBUG_DIR.mkdir(exist_ok=True)
 
