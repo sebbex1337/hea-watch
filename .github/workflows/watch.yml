@@ -3,10 +3,14 @@ name: Watch HEA garage
 on:
   schedule:
     # GitHub Actions cron is UTC ONLY and does not follow DST.
-    # 05:00-17:59 UTC = 06:00-18:59 Danish winter time, 07:00-19:59 summer time.
-    - cron: "7,27,47 5-17 * * *"
-    # Plus a few sweeps outside office hours, in case they publish late.
-    - cron: "13 20,23,3 * * *"
+    # 06:00-14:59 UTC = 08:00-16:59 Danish summer time (CEST, what we're in now),
+    # 07:00-15:59 winter time (CET). Office hours either way, within an hour.
+    #
+    # Deliberately every 30 min, not every 10: GitHub throttles high-frequency
+    # schedules hard and drops most of the runs. Asking for less gets you more.
+    - cron: "9,39 6-14 * * 1-5"
+    # Weekend + evening safety net, in case HEA publishes outside office hours.
+    - cron: "24 17,21 * * *"
   workflow_dispatch:
     inputs:
       test_notification:

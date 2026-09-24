@@ -101,25 +101,49 @@ Locally: `DISCORD_WEBHOOK='https://...' python check.py --test`
 ## Schedule
 
 **GitHub Actions cron is UTC only and does not follow DST.** There is no `timezone:`
-key — if you've seen one suggested, it doesn't exist. The schedule is written in UTC:
+key — if you've seen one suggested, it doesn't exist.
 
 ```yaml
-- cron: "7,27,47 5-17 * * *"   # every 20 min, 05:00-17:59 UTC
-- cron: "13 20,23,3 * * *"     # three off-hours sweeps
+- cron: "9,39 6-14 * * 1-5"   # every 30 min, Mon-Fri office hours
+- cron: "24 17,21 * * *"      # evening + weekend safety net
 ```
 
-05:00–17:59 UTC is 06:00–18:59 Danish winter time and 07:00–19:59 summer time, so
-office hours are covered year round either way. About 42 runs/day, ~1,270/month.
+06:00–14:59 UTC is **08:00–16:59 Danish summer time** and 07:00–15:59 in winter, so
+the window tracks Danish office hours to within an hour year round.
 
-- GitHub's minimum is 5 minutes, but the scheduler is best-effort and drops or
-  delays runs 10–30 minutes under load. Below 15 minutes buys almost nothing.
-- The odd minute offsets avoid `:00`, the worst congestion window.
-- Public repo = unlimited minutes. Private free tier is 2,000/month, which this
-  would blow through at ~1.5 min/run — so if you want it private, drop to hourly.
+### Why only every 30 minutes
 
-**Public repo caveat:** GitHub disables scheduled workflows after 60 days with no
-repo activity. The `state.json` commit each run keeps it alive, but if you get the
-"schedule disabled" email, click re-enable in the Actions tab.
+Because asking for more gets you less. An earlier version of this ran every 20
+minutes — 42 runs/day. GitHub actually delivered **5–6 runs/day**, with a median gap
+of 4 hours and a worst gap of 7.1. Scheduled workflows are explicitly best-effort,
+and GitHub throttles high-frequency crons hardest; runs get delayed by hours or
+dropped entirely. The minimum interval is 5 minutes but it is fiction at that rate.
+
+So: don't lower the interval hoping for faster alerts. It backfires. If you genuinely
+need tight timing, trigger the workflow from outside GitHub — see below.
+
+### Making dropped runs visible
+
+`check_staleness()` alerts (quietly) when more than 12 hours have passed since the
+last successful check. Without it, a watcher that GitHub has stopped scheduling looks
+exactly like a watcher reporting "no change".
+
+### If you need reliable timing
+
+GitHub's scheduler can't give it to you. Trigger from a service that actually honours
+cron, and have it fire a `repository_dispatch`:
+
+```bash
+curl -X POST -H "Authorization: Bearer $GITHUB_PAT" \
+  -H "Accept: application/vnd.github+json" \
+  https://api.github.com/repos/<you>/hea-watch/dispatches \
+  -d '{"event_type":"check-now"}'
+```
+
+Point [cron-job.org](https://cron-job.org) (free) or a Cloudflare Worker cron trigger
+at that, and add `repository_dispatch: {types: [check-now]}` to the workflow's `on:`.
+You keep all the code; only the clock moves.
+
 
 ## Notes
 

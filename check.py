@@ -262,8 +262,37 @@ def notify(title: str, body: str, *, loud: bool, url: str = LISTING_URL) -> None
 # main
 # --------------------------------------------------------------------------- #
 
+STALE_AFTER_HOURS = 12
+
+
+def check_staleness(state: dict) -> tuple[str, str, bool] | None:
+    """GitHub drops most scheduled runs, so notice when coverage gets bad.
+
+    Without this the watcher can go quiet for most of a day and look identical
+    to 'nothing has changed'.
+    """
+    last = state.get("last_checked")
+    if not last:
+        return None
+    try:
+        gap = (datetime.now(timezone.utc) - datetime.fromisoformat(last)).total_seconds() / 3600
+    except ValueError:
+        return None
+    if gap < STALE_AFTER_HOURS:
+        return None
+    return (
+        f"Heads up: {gap:.0f}h since the last check — GitHub is dropping scheduled runs.",
+        f"- expected a check every ~30 min\n+ last one was {last}",
+        False,
+    )
+
+
 def run(page, state: dict) -> dict:
     alerts: list[tuple[str, str, bool]] = []
+
+    stale = check_staleness(state)
+    if stale:
+        alerts.append(stale)
 
     # --- the garage itself -------------------------------------------------- #
     print(f"-> {LISTING_URL}")
