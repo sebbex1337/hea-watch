@@ -262,7 +262,7 @@ def notify(title: str, body: str, *, loud: bool, url: str = LISTING_URL) -> None
 # main
 # --------------------------------------------------------------------------- #
 
-STALE_AFTER_HOURS = 12
+STALE_AFTER_HOURS = 4
 
 
 def check_staleness(state: dict) -> tuple[str, str, bool] | None:
@@ -282,7 +282,7 @@ def check_staleness(state: dict) -> tuple[str, str, bool] | None:
         return None
     return (
         f"Heads up: {gap:.0f}h since the last check — GitHub is dropping scheduled runs.",
-        f"- expected a check every ~30 min\n+ last one was {last}",
+        f"- expected a check every 30 min via the external trigger\n+ last one was {last}",
         False,
     )
 
