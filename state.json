@@ -63,13 +63,13 @@
       "https://hea.dk/lejemaal/p-plads/parkeringsplads-pa-attraktiv-beliggenhed-i-aflast-p-kaelder-copy-2",
       "https://hea.dk/lejemaal/p-plads/parkeringspladser-ved-horsholm-gagade-til-leje"
     ],
-    "checked": "2026-09-25T11:44:52+00:00"
+    "checked": "2026-09-25T17:05:26+00:00"
   },
   "seen_status_phrases": [
     "udlejet"
   ],
   "first_seen": "2026-09-22T15:29:45+00:00",
-  "last_checked": "2026-09-25T11:44:52+00:00",
+  "last_checked": "2026-09-25T17:05:26+00:00",
   "last_change": null,
   "consecutive_failures": 0
 }
