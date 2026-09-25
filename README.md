@@ -98,51 +98,60 @@ one `@everyone`. Both should arrive.
 
 Locally: `DISCORD_WEBHOOK='https://...' python check.py --test`
 
-## Schedule
+## Schedule: why the clock lives outside GitHub
 
-**GitHub Actions cron is UTC only and does not follow DST.** There is no `timezone:`
-key — if you've seen one suggested, it doesn't exist.
+**GitHub's cron does not work for this.** Measured over three days on this repo:
 
-```yaml
-- cron: "9,39 6-14 * * 1-5"   # every 30 min, Mon-Fri office hours
-- cron: "24 17,21 * * *"      # evening + weekend safety net
+| | Scheduled | Actually ran | Median gap |
+|---|---|---|---|
+| every 20 min | 42/day | 5-6/day | 4h (worst 7.1h) |
+| every 30 min | ~20/day | 3/day | 11.8h |
+
+Lowering the frequency made it *worse*. Scheduled workflows are best-effort and
+GitHub simply drops most of them; delivered runs arrived 2-3 hours after their slot.
+No cron expression fixes this.
+
+Runs triggered **on demand**, though, start within a second — the executor was never
+the problem, only the clock. So an external cron service POSTs a `repository_dispatch`
+and GitHub runs the check immediately:
+
+```
+cron-job.org  --every 30 min-->  POST /repos/<you>/hea-watch/dispatches
+                                            |
+                                            v
+                                GitHub Actions runs check.py --> Discord
 ```
 
-06:00–14:59 UTC is **08:00–16:59 Danish summer time** and 07:00–15:59 in winter, so
-the window tracks Danish office hours to within an hour year round.
+The `schedule:` block is kept at three slots a day purely as a fallback if the
+external trigger dies. Don't rely on its timing.
 
-### Why only every 30 minutes
+### Setting up the trigger
 
-Because asking for more gets you less. An earlier version of this ran every 20
-minutes — 42 runs/day. GitHub actually delivered **5–6 runs/day**, with a median gap
-of 4 hours and a worst gap of 7.1. Scheduled workflows are explicitly best-effort,
-and GitHub throttles high-frequency crons hardest; runs get delayed by hours or
-dropped entirely. The minimum interval is 5 minutes but it is fiction at that rate.
+1. **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained
+   tokens → Generate new token.**
+   - Repository access: **Only select repositories** → `hea-watch`
+   - Repository permissions: **Contents → Read and write** (this is what `dispatches`
+     requires; nothing else needs enabling)
+   - Set an expiry you'll actually notice, and diary a reminder to rotate it.
+2. **[cron-job.org](https://cron-job.org) → Create cronjob:**
+   - URL: `https://api.github.com/repos/<you>/hea-watch/dispatches`
+   - Schedule: every 30 minutes (it does handle `Europe/Copenhagen` properly, unlike
+     Actions, so you can restrict it to 08:00-16:00 weekdays here rather than in cron)
+   - Method: **POST**
+   - Headers: `Accept: application/vnd.github+json`, `Authorization: Bearer <token>`
+   - Body: `{"event_type":"check-now"}`
+3. Save, hit **Test run**, and confirm a `repository_dispatch` run appears in the
+   Actions tab. A correct call returns **204 No Content** with an empty body.
 
-So: don't lower the interval hoping for faster alerts. It backfires. If you genuinely
-need tight timing, trigger the workflow from outside GitHub — see below.
+That token can write to this repo, so scope it to this repo alone. If you'd rather it
+didn't sit in someone else's service, a Cloudflare Worker cron trigger does the same
+job with the token in your own account.
 
 ### Making dropped runs visible
 
-`check_staleness()` alerts (quietly) when more than 12 hours have passed since the
-last successful check. Without it, a watcher that GitHub has stopped scheduling looks
-exactly like a watcher reporting "no change".
-
-### If you need reliable timing
-
-GitHub's scheduler can't give it to you. Trigger from a service that actually honours
-cron, and have it fire a `repository_dispatch`:
-
-```bash
-curl -X POST -H "Authorization: Bearer $GITHUB_PAT" \
-  -H "Accept: application/vnd.github+json" \
-  https://api.github.com/repos/<you>/hea-watch/dispatches \
-  -d '{"event_type":"check-now"}'
-```
-
-Point [cron-job.org](https://cron-job.org) (free) or a Cloudflare Worker cron trigger
-at that, and add `repository_dispatch: {types: [check-now]}` to the workflow's `on:`.
-You keep all the code; only the clock moves.
+`check_staleness()` alerts (quietly) when more than 4 hours pass with no successful
+check — which is how you find out the external trigger has stopped, rather than
+mistaking silence for "nothing has changed".
 
 
 ## Notes
