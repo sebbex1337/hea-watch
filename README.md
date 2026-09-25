@@ -138,7 +138,19 @@ external trigger dies. Don't rely on its timing.
    - Schedule: every 30 minutes (it does handle `Europe/Copenhagen` properly, unlike
      Actions, so you can restrict it to 08:00-16:00 weekdays here rather than in cron)
    - Method: **POST**
-   - Headers: `Accept: application/vnd.github+json`, `Authorization: Bearer <token>`
+   - Headers — four rows. The Key field is the header *name* only and the Value
+     field the value only; cron-job.org adds the colon itself:
+
+     | Key | Value |
+     |---|---|
+     | `Accept` | `application/vnd.github+json` |
+     | `Authorization` | `Bearer <token>` |
+     | `Content-Type` | `application/json` |
+     | `User-Agent` | `hea-watch` |
+
+     **The `User-Agent` row is not optional.** GitHub's API rejects any request
+     without one with `403 Request forbidden by administrative rules`, which reads
+     like a permissions problem and isn't. cron-job.org doesn't send one by default.
    - Body: `{"event_type":"check-now"}`
 3. Save, hit **Test run**, and confirm a `repository_dispatch` run appears in the
    Actions tab. A correct call returns **204 No Content** with an empty body.
